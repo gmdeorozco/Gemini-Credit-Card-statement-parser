@@ -44,12 +44,12 @@ def handle_storage_event():
 
         logger.info(f"Received event payload: {json.dumps(event_data, indent=2)}")
         
-        logger.log(f'The bucket name is: {event_data.get('bucket')}')
-        logger.log(f'The file name is: {event_data.get('name')}')
-        logger.log(f'The Content type is: {event_data.get('contentType')}')
+        logger.log(f"The bucket name is: {event_data.get('bucket')}")
+        logger.log(f"The file name is: {event_data.get('name')}")
+        logger.log(f"The Content type is: {event_data.get('contentType')}")
         
         file_address_in_bucket = 'gs://'+event_data.get('bucket')+'/'+event_data.get('name')
-        logger.log(f'The file address in the bucket is: {file_address_in_bucket}')
+        logger.log(f"The file address in the bucket is: {file_address_in_bucket}")
         
 
     except Exception as e:
