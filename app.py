@@ -43,52 +43,14 @@ def handle_storage_event():
             return jsonify({"status": "error", "message": "No JSON payload received"}), 400
 
         logger.info(f"Received event payload: {json.dumps(event_data, indent=2)}")
-
-        # Extract the Pub/Sub message data, which is base64 encoded.
-        # Cloud Storage events are often wrapped in a Pub/Sub message when sent via Eventarc.
-        if 'message' in event_data and 'data' in event_data['message']:
-            pubsub_message_data = event_data['message']['data']
-            # Decode the base64 encoded data
-            decoded_data = base64.b64decode(pubsub_message_data).decode('utf-8')
-            storage_event = json.loads(decoded_data)
-
-            # Extract relevant information from the storage event
-            bucket_name = storage_event.get('bucket')
-            file_name = storage_event.get('name')
-            content_type = storage_event.get('contentType')
-            file_size = storage_event.get('size')
-            event_type = event_data['message']['attributes'].get('eventType') # Eventarc event type
-
-            logger.info(f"--- Cloud Storage Event Details ---")
-            logger.info(f"Event Type: {event_type}")
-            logger.info(f"Bucket: {bucket_name}")
-            logger.info(f"File Name: {file_name}")
-            logger.info(f"Content Type: {content_type}")
-            logger.info(f"File Size: {file_size} bytes")
-            logger.info(f"---------------------------------")
-
-            # Check if the file is a PDF
-            if file_name and file_name.lower().endswith('.pdf') or (content_type and 'application/pdf' in content_type):
-                message = f"Successfully processed PDF file: {file_name} from bucket: {bucket_name}"
-                logger.info(message)
-                # --- Add your PDF processing logic here ---
-                # For example, you might download the file using google-cloud-storage library:
-                # from google.cloud import storage
-                # client = storage.Client()
-                # bucket = client.get_bucket(bucket_name)
-                # blob = bucket.blob(file_name)
-                # blob.download_to_filename(f'/tmp/{file_name}') # Download to /tmp, Cloud Run's writable directory
-                # Then process the downloaded PDF.
-                # ----------------------------------------
-                return jsonify({"status": "success", "message": message}), 200
-            else:
-                message = f"File {file_name} is not a PDF. Skipping."
-                logger.info(message) # Use info for non-PDF files that are intentionally skipped
-                return jsonify({"status": "ignored", "message": message}), 200
-
-        else:
-            logger.warning("Received event but missing Pub/Sub message data.")
-            return jsonify({"status": "error", "message": "Event payload missing Pub/Sub message data"}), 400
+        
+        logger.log(f'The bucket name is: {event_data.get('bucket')}')
+        logger.log(f'The file name is: {event_data.get('name')}')
+        logger.log(f'The Content type is: {event_data.get('contentType')}')
+        
+        file_address_in_bucket = 'gs://'+event_data.get('bucket')+'/'+event_data.get('name')
+        logger.log(f'The file address in the bucket is: {file_address_in_bucket}')
+        
 
     except Exception as e:
         logger.error(f"Error processing event: {e}", exc_info=True) # Use exc_info=True to include traceback
