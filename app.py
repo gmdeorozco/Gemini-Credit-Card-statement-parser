@@ -42,15 +42,20 @@ def handle_storage_event():
             logger.warning("No JSON payload received.")
             return jsonify({"status": "error", "message": "No JSON payload received"}), 400
 
+       # This line is correct for logging the initial raw payload
         logger.info(f"Received event payload: {json.dumps(event_data, indent=2)}")
-        
-        logger.log(f"The bucket name is: {event_data.get('bucket')}")
-        logger.log(f"The file name is: {event_data.get('name')}")
-        logger.log(f"The Content type is: {event_data.get('contentType')}")
-        
+
+        # --- Assuming these lines are placed AFTER 'storage_event = json.loads(decoded_data)' ---
+
+        # Corrected: Accessing properties from 'storage_event', not 'event_data'
+        logger.info(f"The bucket name is: {event_data.get('bucket')}")
+        logger.info(f"The file name is: {event_data.get('name')}")
+        logger.info(f"The Content type is: {event_data.get('contentType')}")
+
         file_address_in_bucket = 'gs://'+event_data.get('bucket')+'/'+event_data.get('name')
-        logger.log(f"The file address in the bucket is: {file_address_in_bucket}")
-        
+        logger.info(f"The file address in the bucket is: {file_address_in_bucket}")
+
+        # ... rest of your code
 
     except Exception as e:
         logger.error(f"Error processing event: {e}", exc_info=True) # Use exc_info=True to include traceback
