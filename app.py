@@ -54,6 +54,7 @@ def handle_storage_event():
 
         file_address_in_bucket = 'gs://'+event_data.get('bucket')+'/'+event_data.get('name')
         logger.info(f"The file address in the bucket is: {file_address_in_bucket}")
+        return jsonify({"status": "success", "message": "Event processed successfully"}), 200
 
         # ... rest of your code
 
