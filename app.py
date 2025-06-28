@@ -27,7 +27,7 @@ app = Flask(__name__)
 # Define the root route for handling incoming requests
 # Cloud Run typically expects a service to listen for POST requests when triggered by events.
 @app.route('/', methods=['POST'])
-def handle_storage_event():
+def handle_storage_event(request):
     """
     Handles incoming Cloud Storage event notifications.
     When a file is uploaded to a Google Cloud Storage bucket,
@@ -36,24 +36,18 @@ def handle_storage_event():
     try:
         # Get the JSON payload from the request body
         # This payload contains information about the Cloud Storage event.
-        event_data = request.get_json()
+        data = request.get_json()
 
-        if not event_data:
+        if not data:
             logger.warning("No JSON payload received.")
             return jsonify({"status": "error", "message": "No JSON payload received"}), 400
 
        # This line is correct for logging the initial raw payload
-        logger.info(f"Received event payload: {json.dumps(event_data, indent=2)}")
-
-        # --- Assuming these lines are placed AFTER 'storage_event = json.loads(decoded_data)' ---
+        logger.info(f"Received event payload: {json.dumps(data, indent=2)}")
 
         # Corrected: Accessing properties from 'storage_event', not 'event_data'
-        logger.info(f"The bucket name is: {event_data.get('bucket')}")
-        logger.info(f"The file name is: {event_data.get('name')}")
-        logger.info(f"The Content type is: {event_data.get('contentType')}")
-
-        file_address_in_bucket = 'gs://'+event_data.get('bucket')+'/'+event_data.get('name')
-        logger.info(f"The file address in the bucket is: {file_address_in_bucket}")
+        logger.info(f"The bucket address is: {data.get('bucket_address')}")
+        
         return jsonify({"status": "success", "message": "Event processed successfully"}), 200
 
         # ... rest of your code
