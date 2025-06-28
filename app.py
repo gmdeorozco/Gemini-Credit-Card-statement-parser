@@ -5,21 +5,8 @@ from flask import Flask, request, jsonify
 import os
 import base64
 import json
-import logging # Import the logging module
+from logger_config import logger
 
-# Configure logging
-# Get the root logger
-logger = logging.getLogger()
-# Set the logging level (e.g., INFO, DEBUG, WARNING, ERROR, CRITICAL)
-logger.setLevel(logging.INFO)
-# Create a console handler to output logs to stderr (where Cloud Run captures them)
-handler = logging.StreamHandler()
-# Define the format for the log messages
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-# Set the formatter for the handler
-handler.setFormatter(formatter)
-# Add the handler to the logger
-logger.addHandler(handler)
 
 # Create a Flask app instance
 app = Flask(__name__)
