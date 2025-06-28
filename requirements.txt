@@ -1,3 +1,4 @@
-google.genai
+google-genai
 dotenv
-flask
+Flask
+dotenv
