@@ -1,5 +1,16 @@
+"""
+This module implements a Flask application that serves as an event processor.
+
+It listens for POST requests at its root endpoint ('/') containing a JSON payload.
+The application expects a 'bucket_address' field within the received JSON.
+Upon receiving a valid payload, it uses the 'bucket_address' to retrieve a JSON statement
+via the `gemini_json_generator.get_json_from_statement` function.
+
+The module provides robust error handling and logging for incoming requests and
+processing failures. It's designed to be deployed in environments like Google Cloud Run,
+utilizing the 'PORT' environment variable for server configuration.
+"""
 import os
-import base64
 import json
 from flask import Flask, request, jsonify
 from logger_config import logger
@@ -7,31 +18,35 @@ from gemini_json_generator import get_json_from_statement
 
 
 
-# Create a Flask app instance
+# Flask app instance
 app = Flask(__name__)
 
 # Define the root route for handling incoming requests
-# Cloud Run typically expects a service to listen for POST requests when triggered by events.
 @app.route('/', methods=['POST'])
-def handle_storage_event():
+def process_event():
     """
-    Handles incoming Cloud Storage event notifications.
-    When a file is uploaded to a Google Cloud Storage bucket,
-    Eventarc sends a POST request with the event payload to this endpoint.
+    Handles incoming POST requests containing a JSON payload.
+
+    This function expects a JSON object in the request body. It attempts to extract
+    a 'bucket_address' from this payload. If successful, it then calls
+    `get_json_from_statement` with the 'bucket_address' to retrieve a JSON statement.
+    The function logs the received payload and any errors encountered.
+
+    Returns:
+        A JSON response indicating the status of the operation and a message.
+        If successful, it includes the retrieved JSON statement.
+        Returns a 200 status code on success, 400 if no JSON payload is received,
+        and 500 if an unexpected error occurs during processing.
     """
     try:
         # Get the JSON payload from the request body
-        # This payload contains information about the Cloud Storage event.
         data = request.get_json()
 
         if not data:
             logger.warning("No JSON payload received.")
             return jsonify({"status": "error", "message": "No JSON payload received"}), 400
 
-       # This line is correct for logging the initial raw payload
         logger.info(f"Received event payload: {json.dumps(data, indent=2)}")
-
-        # Corrected: Accessing properties from 'storage_event', not 'event_data'
         logger.info(f"The bucket address is: {data.get('bucket_address')}")
 
         json_statement = get_json_from_statement(data.get('bucket_address'))
@@ -39,10 +54,10 @@ def handle_storage_event():
         
         return jsonify({"status": "success", "message": "Event processed successfully", "statement":json_statement}), 200
 
-        # ... rest of your code
+
 
     except Exception as e:
-        logger.error(f"Error processing event: {e}", exc_info=True) # Use exc_info=True to include traceback
+        logger.error(f"Error processing event: {e}", exc_info=True) 
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # This ensures the Flask development server runs only when the script is executed directly.
