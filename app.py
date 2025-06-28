@@ -1,11 +1,10 @@
-# app.py
-
-# Import necessary Flask components
-from flask import Flask, request, jsonify
 import os
 import base64
 import json
+from flask import Flask, request, jsonify
 from logger_config import logger
+from gemini_json_generator import get_json_from_statement
+
 
 
 # Create a Flask app instance
@@ -14,7 +13,7 @@ app = Flask(__name__)
 # Define the root route for handling incoming requests
 # Cloud Run typically expects a service to listen for POST requests when triggered by events.
 @app.route('/', methods=['POST'])
-def handle_storage_event(request):
+def handle_storage_event():
     """
     Handles incoming Cloud Storage event notifications.
     When a file is uploaded to a Google Cloud Storage bucket,
@@ -34,8 +33,11 @@ def handle_storage_event(request):
 
         # Corrected: Accessing properties from 'storage_event', not 'event_data'
         logger.info(f"The bucket address is: {data.get('bucket_address')}")
+
+        json_statement = get_json_from_statement(data.get('bucket_address'))
+
         
-        return jsonify({"status": "success", "message": "Event processed successfully"}), 200
+        return jsonify({"status": "success", "message": "Event processed successfully", "statement":json_statement}), 200
 
         # ... rest of your code
 
