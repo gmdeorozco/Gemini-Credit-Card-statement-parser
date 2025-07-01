@@ -24,6 +24,18 @@ statement_response_schema = {
         "statement_balance": {"type": "number"},
         "minimum_payment": {"type": "number"},
         "interest_rate": {"type": "number"},
+        "credits": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "credit_date": {"type": "string", "format": "date"},
+                    "description": {"type": "string"},
+                    "amount": {"type": "number"}
+                },
+                "required": ["credit_date", "description", "amount"]
+            }
+        },
         "transactions": {
             "type": "array",
             "items": {
@@ -35,7 +47,7 @@ statement_response_schema = {
                 },
                 "required": ["transaction_date", "description", "amount"]
             }
-        }
+        },
     },
     "required": [
         "credit_card_company",
@@ -45,7 +57,9 @@ statement_response_schema = {
         "statement_balance",
         "minimum_payment",
         "interest_rate",
-        "transactions"
+        "credits",
+        "transactions",
+        
     ]
 }
 
